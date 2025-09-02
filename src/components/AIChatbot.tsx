@@ -19,11 +19,11 @@ interface AIChatbotProps {
 export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
+      id: "1",
       text: "Hello! I'm your AI eye care assistant. I can help you with information about our services, symptoms, appointment booking, and general eye health questions. How can I assist you today?",
       isBot: true,
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +31,7 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
 
   const quickReplies = [
     "Book Appointment",
-    "Services Offered", 
+    "Services Offered",
     "Emergency Care",
     "Insurance Coverage",
     "LASIK Information",
@@ -47,7 +47,7 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
     "Pre-Surgery Instructions",
     "Vision Therapy",
     "Retinal Specialist",
-    "Eye Safety Tips"
+    "Eye Safety Tips",
   ];
 
   const scrollToBottom = () => {
@@ -58,42 +58,43 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
     scrollToBottom();
   }, [messages]);
 
+  // ✅ Gemini API integration
   const getAIResponse = async (userQuery: string): Promise<string> => {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Elite Eye Care Chatbot'
-        },
-        body: JSON.stringify({
-          model: 'deepseek/deepseek-r1:free',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a helpful AI assistant for Elite Eye Care, a premium eye hospital. Answer queries professionally and helpfully, focusing on eye care, vision health, and our services. Keep responses concise but informative. If asked about booking appointments, direct them to use our booking form or call us.'
-            },
-            {
-              role: 'user',
-              content: userQuery
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        })
-      });
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${
+          import.meta.env.VITE_GEMINI_API_KEY
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: userQuery }],
+              },
+            ],
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `API request failed: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      return data.choices?.[0]?.message?.content || "I apologize, but I'm having trouble responding right now. Please try again or contact our office directly.";
+      return (
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "I apologize, but I'm having trouble responding right now. Please try again."
+      );
     } catch (error) {
-      console.error('Error calling OpenRouter API:', error);
-      return "I'm sorry, I'm experiencing technical difficulties. Please contact our office at your convenience for immediate assistance.";
+      console.error("Error calling Gemini API:", error);
+      return "I'm sorry, I'm experiencing technical difficulties. Please contact our office.";
     }
   };
 
@@ -104,24 +105,24 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
       id: Date.now().toString(),
       text: message,
       isBot: false,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
     try {
       const botResponse = await getAIResponse(message);
-      
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: botResponse,
         isBot: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       toast.error("Failed to get AI response. Please try again.");
     } finally {
@@ -134,7 +135,7 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(inputValue);
     }
@@ -152,52 +153,55 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
   }
 
   return (
-    <div className="chatbot-container animate-slide-up">
+    <div className="chatbot-container animate-slide-up flex flex-col h-[550px] w-96 max-w-full bg-background rounded-2xl shadow-xl fixed bottom-6 right-6 z-50">
       {/* Header */}
-      <div className="chatbot-header">
+      <div className="chatbot-header flex items-center justify-between p-3 border-b bg-primary text-primary-foreground rounded-t-2xl">
         <div className="flex items-center">
           <Bot className="w-6 h-6 mr-2" />
           <div>
             <h3 className="font-semibold">AI Eye Care Assistant</h3>
-            <p className="text-xs opacity-90">Powered by DeepSeek</p>
+            <p className="text-xs opacity-90">Powered by Gemini AI</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={onToggle}
-            variant="ghost"
-            size="sm"
-            className="text-primary-foreground hover:bg-white/20 rounded-full w-8 h-8 p-0"
-            title="Close Chat"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
+        <Button
+          onClick={onToggle}
+          variant="ghost"
+          size="sm"
+          className="text-primary-foreground hover:bg-white/20 rounded-full w-8 h-8 p-0"
+          title="Close Chat"
+        >
+          <X className="w-5 h-5" />
+        </Button>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background/50">
+      {/* Messages with scroll */}
+      <div className="flex-1 p-4 space-y-4 bg-background/50 overflow-y-auto">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${message.isBot ? 'justify-start' : 'justify-end'} animate-fade-left`}
+            className={`flex ${
+              message.isBot ? "justify-start" : "justify-end"
+            } animate-fade-left`}
           >
             <div
               className={`max-w-[80%] p-3 rounded-2xl ${
                 message.isBot
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-gradient-to-r from-primary to-primary-glow text-primary-foreground'
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
               }`}
             >
               <div className="flex items-start gap-2">
-                {message.isBot && <Bot className="w-4 h-4 mt-0.5 flex-shrink-0" />}
-                {!message.isBot && <User className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+                {message.isBot ? (
+                  <Bot className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <User className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                )}
                 <p className="text-sm leading-relaxed">{message.text}</p>
               </div>
             </div>
           </div>
         ))}
-        
+
         {isLoading && (
           <div className="flex justify-start animate-fade-left">
             <div className="bg-accent text-accent-foreground p-3 rounded-2xl">
@@ -208,7 +212,7 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -233,7 +237,7 @@ export const AIChatbot = ({ isOpen, onToggle }: AIChatbotProps) => {
       )}
 
       {/* Input */}
-      <div className="p-4 border-t bg-background">
+      <div className="p-4 border-t bg-background rounded-b-2xl">
         <div className="flex gap-2 mb-2">
           <Input
             value={inputValue}
