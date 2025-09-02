@@ -36,11 +36,17 @@ npm run preview
 
 ## 🛠 Technologies Used
 
-- **Frontend**: React + TypeScript + Vite
-- **Styling**: Tailwind CSS + Shadcn UI Components
+- **Core Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**:
+  - Tailwind CSS for utility-first styling
+  - Shadcn UI component library
+  - Radix UI primitives
 - **State Management**: React Context API
-- **Form Handling**: React Hook Form
-- **Visualization**: Recharts
+- **Form Handling**: React Hook Form with Zod validation
+- **Data Visualization**: Recharts
+- **UI Components**: Sonner for toast notifications
+- **Development Tools**: ESLint, Prettier
 
 ## 📂 Project Structure
 
