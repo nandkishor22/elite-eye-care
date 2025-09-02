@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-![Hospital Overview](/image.png)
+![Hospital Overview](https://raw.githubusercontent.com/nandkishor22/elite-eye-care/refs/heads/main/public/image.png)
 A modern hospital management web application with AI-powered features and seamless patient care workflows.
 
 ## ✨ Features
